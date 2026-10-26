@@ -1,0 +1,106 @@
+{
+  "name": "usage-meter",
+  "displayName": "Claude Code & Codex Usage Meter",
+  "description": "Your Claude Code and Codex usage limits (5-hour and weekly) in the status bar, with reset times and a warning before you run out. Reads local files only; no account, no telemetry.",
+  "version": "0.1.2",
+  "publisher": "paneherd",
+  "license": "MIT",
+  "homepage": "https://paneherd.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/erenxcolakx/usage-meter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/erenxcolakx/usage-meter/issues"
+  },
+  "private": true,
+  "engines": {
+    "vscode": "^1.95.0",
+    "node": ">=22.6"
+  },
+  "categories": [
+    "AI",
+    "Other"
+  ],
+  "keywords": [
+    "claude code usage",
+    "claude usage limits",
+    "claude code limits",
+    "claude code rate limit",
+    "codex usage",
+    "codex limits",
+    "codex rate limit",
+    "usage meter",
+    "usage limits",
+    "token usage",
+    "5 hour limit",
+    "weekly limit",
+    "status bar",
+    "claude code",
+    "codex"
+  ],
+  "icon": "media/icon.png",
+  "main": "./dist/extension.js",
+  "extensionKind": [
+    "workspace"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "usageMeter.show",
+        "title": "Usage Meter: Show Limits"
+      },
+      {
+        "command": "usageMeter.enableClaude",
+        "title": "Usage Meter: Show Claude Code Limits"
+      },
+      {
+        "command": "usageMeter.disableClaude",
+        "title": "Usage Meter: Stop Reading Claude Code Limits"
+      },
+      {
+        "command": "usageMeter.refresh",
+        "title": "Usage Meter: Refresh"
+      }
+    ],
+    "configuration": {
+      "title": "Usage Meter",
+      "properties": {
+        "usageMeter.showClaude": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Show Claude Code's limits in the status bar."
+        },
+        "usageMeter.showCodex": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Show Codex's limits in the status bar."
+        },
+        "usageMeter.warnAt": {
+          "type": "number",
+          "default": 85,
+          "minimum": 0,
+          "maximum": 100,
+          "markdownDescription": "Warn once per limit window when it passes this percentage, and color the status bar item. `0` turns warnings off."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "typecheck": "tsc -p .",
+    "test": "node --test \"test/unit/*.test.ts\"",
+    "package": "node esbuild.mjs --production && vsce package --no-dependencies --out dist/"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "22.15.30",
+    "@types/vscode": "1.95.0",
+    "@vscode/vsce": "3.6.0",
+    "esbuild": "0.25.10",
+    "typescript": "5.9.3"
+  }
+}
