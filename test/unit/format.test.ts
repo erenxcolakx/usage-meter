@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { claudeAgent, codexAgent, highest, newWarnings, statusText, untilReset, windowLabel, windowLine } from '../../src/format.ts';
+import { cacheBarText, cacheLines, claudeAgent, codexAgent, highest, newWarnings, statusText, untilReset, windowLabel, windowLine } from '../../src/format.ts';
 
 const NOW = Date.UTC(2026, 9, 21, 12);
 const MIN = 60_000;
@@ -46,4 +46,28 @@ test('a warning comes once per window, and again for the next one', () => {
   assert.deepEqual(newWarnings(at(NOW + 60 * MIN, 99), 85, warned, NOW), []);
   assert.equal(newWarnings(at(NOW + 360 * MIN, 90), 85, warned, NOW).length, 1);
   assert.deepEqual(newWarnings(at(NOW + 720 * MIN, 100), 0, new Set(), NOW), [], '0 turns warnings off');
+});
+
+const clock = (over: Partial<import('../../src/core/index.ts').CacheClock> = {}) => ({ lastAt: NOW, ttlMs: 60 * MIN, expiresAt: NOW + 60 * MIN, contextTokens: 253_000, model: 'claude-sonnet-4', ...over });
+
+test('the status bar mentions the cache only near its end or once it ran out', () => {
+  assert.equal(cacheBarText(null, NOW), null);
+  assert.equal(cacheBarText(clock(), NOW), null);
+  assert.equal(cacheBarText(clock(), NOW + 50 * MIN), 'cache 10 min');
+  assert.equal(cacheBarText(clock(), NOW + 57 * MIN), 'cache 3 min');
+  assert.equal(cacheBarText(clock(), NOW + 61 * MIN), 'cache cold');
+  assert.equal(cacheBarText(clock(), NOW + 60 * MIN + 7 * 3600_000), null, 'a session left alone for hours is not news');
+});
+
+test('the tooltip says when the cache ends and what coming back after it costs', () => {
+  assert.deepEqual(cacheLines(null, NOW), []);
+  assert.deepEqual(cacheLines(clock(), NOW + 18 * MIN), [
+    'Prompt cache: warm, runs out in 42 min (1-hour cache).',
+    'After that, the next reply sends 253k tokens of context again at 20× the price of a warm one.',
+  ]);
+  const short = clock({ ttlMs: 5 * MIN, expiresAt: NOW + 5 * MIN, contextTokens: 80_000 });
+  assert.match(cacheLines(short, NOW + 4.5 * MIN)[0]!, /about to run out/);
+  assert.match(cacheLines(short, NOW + 4.5 * MIN)[1]!, /80k tokens .* 12\.5×/);
+  assert.deepEqual(cacheLines(short, NOW + 25 * MIN), ['Prompt cache: ran out 20 min ago; the next reply sends 80k tokens of context again at 12.5× the price of a warm one.']);
+  assert.deepEqual(cacheLines(short, NOW + 10 * 3600_000), []);
 });

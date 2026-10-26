@@ -2,7 +2,7 @@
   "name": "usage-meter",
   "displayName": "Claude Code & Codex Usage Meter",
   "description": "Your Claude Code and Codex usage limits (5-hour and weekly) in the status bar, with reset times and a warning before you run out. Reads local files only; no account, no telemetry.",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "publisher": "paneherd",
   "license": "MIT",
   "homepage": "https://paneherd.com",
@@ -78,6 +78,11 @@
           "type": "boolean",
           "default": true,
           "markdownDescription": "Show Codex's limits in the status bar."
+        },
+        "usageMeter.showCache": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Show when the prompt cache of the Claude Code session you are working in runs out, and what a reply costs after that. The status bar mentions it only in the last 10 minutes or once it has run out; the tooltip always has it."
         },
         "usageMeter.warnAt": {
           "type": "number",

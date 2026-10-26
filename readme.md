@@ -8,11 +8,6 @@ Claude 5h 32% 7d 14%   Codex 5h 8% 7d 3%
 
 Hover for the reset times. Click for details and settings. The item turns yellow at your warning percentage (85% by default) and red at 95%.
 
-## Install
-
-- **VS Code**: [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=paneherd.usage-meter), or search "Claude Code & Codex Usage Meter" in the Extensions view.
-- **Cursor, VSCodium, Windsurf**: [Open VSX](https://open-vsx.org/extension/paneherd/usage-meter).
-
 ## Setup
 
 - **Codex**: nothing to do. The limits are read from the session logs Codex writes on this computer (`~/.codex/sessions`, or `$CODEX_HOME`). They update after each Codex reply.
@@ -21,6 +16,10 @@ Hover for the reset times. Click for details and settings. The item turns yellow
   - If you already have one, the extension leaves it alone unless you say *Wrap it*: it then runs your command exactly as before, after saving its copy. On Windows, wrapping is not available yet.
   - *Usage Meter: Stop Reading Claude Code Limits* puts your settings back as they were.
   - Claude Code shows limits to claude.ai **Pro and Max** subscribers, after the first reply of a session. API-key users have none to show.
+
+## Prompt cache clock
+
+Claude Code sends the whole conversation with every reply. While the prompt cache is warm those tokens cost a tenth of the input price; after a break longer than the cache lasts they are written again at 1.25 times (5-minute cache) or 2 times (1-hour cache) the price, so a long conversation can use a noticeable share of your limit in one reply. The tooltip shows when the cache of the session you are working in runs out and how big that rewrite would be. The status bar adds `cache 4 min` only in the last 10 minutes, and `cache cold` once it has run out. The lifetime is read from the session's own transcript, so it is the one your plan really gets. It reads the newest transcript under `~/.claude/projects` on this computer and nothing else. Turn it off with `usageMeter.showCache`.
 
 ## What it does not do
 
@@ -34,6 +33,7 @@ Hover for the reset times. Click for details and settings. The item turns yellow
 |---|---|---|
 | `usageMeter.showClaude` | on | Show Claude Code's limits |
 | `usageMeter.showCodex` | on | Show Codex's limits |
+| `usageMeter.showCache` | on | Prompt cache clock for the session you are working in |
 | `usageMeter.warnAt` | 85 | Warn once per window past this percentage; `0` turns it off |
 
 ## More on the limits
@@ -43,19 +43,6 @@ Hover for the reset times. Click for details and settings. The item turns yellow
 ## Why does Claude Code usage run out so fast?
 
 Long conversations, cache misses after a break, forgotten scheduled tasks and subagents are the usual causes. [This guide](https://paneherd.com/guides/claude-code-usage-running-out-fast) goes through them and shows how `/usage` finds yours.
-
-## Source
-
-MIT licensed. The whole extension is in `src/`: `claudeStatus.ts` reads the report the status line command saves, `core/codexUsage.ts` reads Codex's session logs, `statusLineSetup.ts` adds and removes the status line command, and `format.ts` turns the figures into the status bar text.
-
-```
-npm install
-npm run typecheck
-npm test
-npm run package   # builds dist/usage-meter-<version>.vsix
-```
-
-Needs Node 22.6 or newer. Issues and pull requests are welcome; the figures come from what Claude Code and Codex report, so a change that would send anything off the computer will not be accepted.
 
 ## From the makers of Paneherd
 

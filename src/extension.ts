@@ -1,9 +1,9 @@
 import { mkdir, readFile, rename, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import * as vscode from 'vscode';
-import { claudeConfigDir, CodexLimitsReader, codexSessionsDir, type CodexLimits, type UsageLimits } from './core/index.ts';
+import { claudeConfigDir, claudeProjectsDir, CodexLimitsReader, codexSessionsDir, latestTranscript, readCacheClock, type CacheClock, type CodexLimits, type UsageLimits } from './core/index.ts';
 import { meterDir, readClaudeLimits } from './claudeStatus.ts';
-import { claudeAgent, codexAgent, highest, newWarnings, statusText, windowLine, type MeterAgent } from './format.ts';
+import { cacheBarText, cacheLines, claudeAgent, codexAgent, highest, newWarnings, statusText, windowLine, type MeterAgent } from './format.ts';
 import {
   inspectStatusLine,
   OWN_SH_COMMAND,
@@ -18,6 +18,8 @@ import {
 const ASKED_KEY = 'usageMeter.askedClaude';
 const TICK_MS = 15_000;
 const CODEX_EVERY = 2;
+/** Looking for the newest transcript touches every project folder, so it happens once in this many ticks. */
+const TRANSCRIPT_EVERY = 4;
 const ABOUT_URL = 'https://paneherd.com/?from=usage-meter';
 const GUIDE_URL = 'https://paneherd.com/guides/claude-code-usage-running-out-fast';
 
@@ -51,6 +53,9 @@ export function activate(context: vscode.ExtensionContext): void {
   let codexLimits: CodexLimits | null = null;
   let ticks = 0;
   let agents: MeterAgent[] = [];
+  let clock: CacheClock | null = null;
+  let transcript: { file: string; mtimeMs: number } | null = null;
+  let readMtime = 0;
 
   /** The Claude side is on when settings.json carries our command. */
   const claudeOn = async (): Promise<boolean> => {
@@ -72,23 +77,28 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const render = () => {
     const now = Date.now();
+    const cache = cfg().get<boolean>('showCache', true) ? clock : null;
+    const bar = cacheBarText(cache, now);
     agents = [cfg().get<boolean>('showClaude', true) ? claudeAgent(claudeLimits, now) : null, cfg().get<boolean>('showCodex', true) ? codexAgent(codexLimits, now) : null].filter(
       (a): a is MeterAgent => a !== null,
     );
-    if (agents.length === 0) {
+    if (agents.length === 0 && !bar) {
       item.text = '$(pulse) Usage';
       item.tooltip = 'Usage Meter: no Claude Code or Codex limits yet. Click for how to show them.';
       item.backgroundColor = undefined;
       item.show();
       return;
     }
-    item.text = `$(pulse) ${statusText(agents)}`;
+    item.text = `$(pulse) ${[statusText(agents), bar && `$(clock) ${bar}`].filter(Boolean).join('   ')}`;
     const md = new vscode.MarkdownString(undefined, true);
     for (const a of agents) {
       md.appendMarkdown(`**${a.agent}**\n\n`);
       for (const w of a.windows) md.appendMarkdown(`- ${windowLine(w, now)}\n`);
       md.appendMarkdown('\n');
     }
+    for (const line of cacheLines(cache, now)) md.appendMarkdown(`${line}
+
+`);
     md.appendMarkdown('Click for details.');
     item.tooltip = md;
     const top = highest(agents);
@@ -99,7 +109,17 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const refresh = async () => {
     claudeLimits = await readClaudeLimits();
-    if (ticks++ % CODEX_EVERY === 0) codexLimits = await codex.read().catch(() => codexLimits);
+    if (ticks % CODEX_EVERY === 0) codexLimits = await codex.read().catch(() => codexLimits);
+    if (cfg().get<boolean>('showCache', true)) {
+      if (ticks % TRANSCRIPT_EVERY === 0 || !transcript) transcript = await latestTranscript(claudeProjectsDir()).catch(() => null);
+      const m = transcript ? await stat(transcript.file).then((s) => s.mtimeMs, () => 0) : 0;
+      if (!transcript || m === 0) clock = null;
+      else if (m !== readMtime) {
+        readMtime = m;
+        clock = await readCacheClock(transcript.file).catch(() => clock);
+      }
+    }
+    ticks++;
     render();
   };
 
@@ -178,7 +198,12 @@ export function activate(context: vscode.ExtensionContext): void {
       items.push({ label: a.agent, kind: vscode.QuickPickItemKind.Separator });
       for (const w of a.windows) items.push({ label: `$(pulse) ${windowLine(w, now)}` });
     }
-    if (agents.length) items.push({ label: '', kind: vscode.QuickPickItemKind.Separator });
+    const cacheInfo = cfg().get<boolean>('showCache', true) ? cacheLines(clock, now) : [];
+    if (cacheInfo.length) {
+      items.push({ label: 'Prompt cache', kind: vscode.QuickPickItemKind.Separator });
+      for (const line of cacheInfo) items.push({ label: `$(clock) ${line}` });
+    }
+    if (agents.length || cacheInfo.length) items.push({ label: '', kind: vscode.QuickPickItemKind.Separator });
     if (on) items.push({ label: '$(debug-stop) Stop reading Claude limits', description: 'puts your Claude Code settings back', run: disableClaude });
     else items.push({ label: '$(add) Show Claude Code limits', description: 'adds a status line command to Claude Code\'s settings', run: enableClaude });
     items.push({ label: '$(book) Why does Claude Code usage run out so fast?', run: () => vscode.env.openExternal(vscode.Uri.parse(GUIDE_URL)) });

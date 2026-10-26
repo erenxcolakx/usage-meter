@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0
+
+- Prompt cache clock: the tooltip and the quick pick say when the prompt cache of the Claude Code session you are working in runs out, and what the next reply costs after that (the whole context is sent again at 12.5 or 20 times the price of a warm one). The status bar shows `cache 4 min` only in the last 10 minutes, and `cache cold` once it has run out. The cache lifetime (5 minutes or 1 hour) is read from the session's own transcript. New setting `usageMeter.showCache` turns it off.
+
 ## 0.1.2
 
 - Keeps the shared Claude Code usage report current for Paneherd and the status bar.
