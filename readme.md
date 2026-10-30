@@ -19,7 +19,7 @@ Hover for the reset times. Click for details and settings. The item turns yellow
 
 ## Prompt cache clock
 
-Claude Code sends the whole conversation with every reply. While the prompt cache is warm those tokens cost a tenth of the input price; after a break longer than the cache lasts they are written again at 1.25 times (5-minute cache) or 2 times (1-hour cache) the price, so a long conversation can use a noticeable share of your limit in one reply. The tooltip shows when the cache of the session you are working in runs out and how big that rewrite would be. The status bar adds `cache 4 min` only in the last 10 minutes, and `cache cold` once it has run out. The lifetime is read from the session's own transcript, so it is the one your plan really gets. It reads the newest transcript under `~/.claude/projects` on this computer and nothing else. Turn it off with `usageMeter.showCache`.
+Claude Code sends the whole conversation with every reply. While the prompt cache is warm those tokens cost a tenth of the input price (a twentieth on Opus and Sonnet 5.5); after a break longer than the cache lasts they are written again at 1.25 times (5-minute cache) or 2 times (1-hour cache) the price, so a long conversation can use a noticeable share of your limit in one reply. The tooltip shows when the cache of the session you are working in runs out and how big that rewrite would be. The status bar adds `cache 4 min` only in the last 10 minutes, and `cache cold` once it has run out. The lifetime is read from the session's own transcript, so it is the one your plan really gets. It reads the newest transcript under `~/.claude/projects` on this computer and nothing else. Turn it off with `usageMeter.showCache`.
 
 ## What it does not do
 

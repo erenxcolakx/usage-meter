@@ -14,14 +14,11 @@
 import { open, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { messageUsage, parseLine, type MessageUsage } from './transcript.ts';
+import { WRITE_1H, WRITE_5M, modelPrice } from './modelPrices.ts';
 
 export const CACHE_5M_MS = 5 * 60_000;
 export const CACHE_1H_MS = 60 * 60_000;
 
-/** Price of cached input relative to plain input, and of a cache write by lifetime. */
-const READ = 0.1;
-const WRITE_5M = 1.25;
-const WRITE_1H = 2;
 
 export interface CacheClock {
   /** Time of the response that last used or wrote the cache (ms). */
@@ -72,7 +69,8 @@ export interface ColdCost {
 export function coldCost(c: CacheClock): ColdCost | null {
   if (c.contextTokens <= 0) return null;
   const write = c.ttlMs >= CACHE_1H_MS ? WRITE_1H : WRITE_5M;
-  return { rewrittenTokens: c.contextTokens, timesWarm: write / READ, extraInputTokens: c.contextTokens * (write - READ) };
+  const { read } = modelPrice(c.model, c.contextTokens);
+  return { rewrittenTokens: c.contextTokens, timesWarm: write / read, extraInputTokens: c.contextTokens * (write - read) };
 }
 
 const TAIL = 2 * 1024 * 1024;
