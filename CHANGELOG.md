@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.2
+
+- Renamed to Codex Usage & Claude Code Usage Meter, so it turns up when you search the Marketplace for Codex usage. Nothing else changed.
+
 ## 0.2.1
 
 - The prompt cache clock prices a cold resume by the model the session uses. On Opus and Sonnet 5.5 a cache read costs a twentieth of the input price, not a tenth, so a cold resume there costs about 25 times a warm one (1-hour cache: 40 times), where 0.2.0 said 12.5 (20).

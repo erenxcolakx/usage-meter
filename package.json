@@ -1,8 +1,8 @@
 {
   "name": "usage-meter",
-  "displayName": "Claude Code & Codex Usage Meter",
-  "description": "Your Claude Code and Codex usage limits (5-hour and weekly) in the status bar, with reset times and a warning before you run out. Reads local files only; no account, no telemetry.",
-  "version": "0.2.1",
+  "displayName": "Codex Usage & Claude Code Usage Meter",
+  "description": "Your Codex and Claude Code usage limits (5-hour and weekly) in the status bar, with reset times and a warning before you run out. Reads local files only; no account, no telemetry.",
+  "version": "0.2.2",
   "publisher": "paneherd",
   "license": "MIT",
   "homepage": "https://paneherd.com",

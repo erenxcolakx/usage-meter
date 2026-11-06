@@ -1,6 +1,6 @@
-# Claude Code & Codex Usage Meter
+# Codex Usage & Claude Code Usage Meter
 
-Your Claude Code and Codex usage limits in the status bar: how much of the 5-hour and weekly allowance you have used, and when each resets. A warning appears before you run out.
+Your Codex and Claude Code usage limits in the status bar: how much of the 5-hour and weekly allowance you have used, and when each resets. A warning appears before you run out.
 
 ```
 Claude 5h 32% 7d 14%   Codex 5h 8% 7d 3%
