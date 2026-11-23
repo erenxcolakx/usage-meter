@@ -20,8 +20,8 @@ const TICK_MS = 15_000;
 const CODEX_EVERY = 2;
 /** Looking for the newest transcript touches every project folder, so it happens once in this many ticks. */
 const TRANSCRIPT_EVERY = 4;
-const ABOUT_URL = 'https://paneherd.com/?from=usage-meter';
-const GUIDE_URL = 'https://paneherd.com/guides/claude-code-usage-running-out-fast';
+const ABOUT_URL = 'https://paneherd.com/?utm_source=usage-meter&utm_medium=extension';
+const GUIDE_URL = 'https://paneherd.com/guides/claude-code-usage-running-out-fast?utm_source=usage-meter&utm_medium=extension';
 
 const settingsFile = () => path.join(claudeConfigDir(), 'settings.json');
 

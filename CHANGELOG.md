@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.3
+
+- The two links in the status bar menu (the usage guide and Paneherd) now carry a `utm_source=usage-meter` tag, so the site can tell which visits come from this extension. Nothing else changed.
+
 ## 0.2.2
 
 - Renamed to Codex Usage & Claude Code Usage Meter, so it turns up when you search the Marketplace for Codex usage. Nothing else changed.
